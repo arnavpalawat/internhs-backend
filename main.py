@@ -5,6 +5,8 @@ from flask import Flask, jsonify, url_for
 from groq import Groq
 from jobspy import scrape_jobs
 from jobs import Job
+from datetime import datetime
+
 
 app = Flask(__name__)
 
@@ -24,7 +26,7 @@ print("GROQ API key set.")
 def get_jobs():
     print("get_jobs route called.")
     location = "Massachusetts"
-    field = "Software"
+    field = "Research"
 
     def filter_jobs(jobs_list):
         print("Filtering jobs.")
@@ -54,10 +56,10 @@ def get_jobs():
     try:
         jobs = scrape_jobs(
             site_name=["indeed", "zip_recruiter", "glassdoor"],
-            search_term="Software Intern",
+            search_term="Research Intern",
             location=location,
             results_wanted=100,
-            country_indeed='USA',
+            country_indeed='usa',
             hours_old=10000
         )
         print("Jobs scraped successfully.")
@@ -65,7 +67,7 @@ def get_jobs():
         print(f"Error scraping jobs: {e}")
         return jsonify({"error": "Failed to scrape jobs."}), 500
 
-    jobs_list = [Job(row['id'], row['title'], row['company'], row['description'], row['job_url'], 0, field) for _, row in
+    jobs_list = [Job(row['id'], row['title'], row['company'], row['description'], row['job_url'], 0, field, datetime.now()) for _, row in
                  jobs.iterrows() if row["job_type"] != "fulltime"]
 
     print(f"Found {len(jobs_list)} jobs.")

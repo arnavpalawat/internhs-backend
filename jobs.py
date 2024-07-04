@@ -1,8 +1,9 @@
 import firebase_admin
 from firebase_admin import firestore
+from datetime import datetime
 
 class Job:
-    def __init__(self, id, title, company, description, link, prestige, field):
+    def __init__(self, id, title, company, description, link, prestige, field, date):
         self.id = id
         self.title = title
         self.company = company
@@ -10,11 +11,12 @@ class Job:
         self.link = link
         self.prestige = prestige
         self.field = field
+        self.date = date
 
     def __repr__(self):
         return (f"Job(id={self.id}, title={self.title}, company={self.company}, "
                 f"description={self.description}, link={self.link}, prestige={self.prestige}, "
-                f"field={self.field})")
+                f"field={self.field}, date={self.date})")
 
     def display(self):
         return (f"Job ID: {self.id}\n"
@@ -23,17 +25,19 @@ class Job:
                 f"Description: {self.description}\n"
                 f"Link: {self.link}\n"
                 f"Prestige: {self.prestige}\n"
-                f"Field: {self.field}")
+                f"Field: {self.field}\n"
+                f"Date: {self.date}")
 
     def toMap(self):
         return {
-            "id" : self.id,
+            "id": self.id,
             "title": self.title,
             "company": self.company,
             "description": self.description,
             "link": self.link,
             "prestige": self.prestige,
-            "field": self.field
+            "field": self.field,
+            "date": self.date
         }
 
     def firestoreAdd(self):
@@ -46,3 +50,7 @@ class Job:
             doc_ref.set(
                 self.toMap()
             )
+
+# Example usage:
+# job = Job("1", "Software Engineer", "Tech Company", "Develop software", "http://example.com", 5, "Engineering", datetime.now())
+# job.firestoreAdd()
