@@ -1,7 +1,7 @@
 import os
 import firebase_admin
 from firebase_admin import credentials
-from flask import Flask, jsonify, url_for
+from flask import Flask, jsonify, url_for, request
 from groq import Groq
 from jobspy import scrape_jobs
 from jobs import Job
@@ -24,21 +24,28 @@ print("GROQ API key set.")
 
 @app.route('/')
 def get_jobs():
-    print("get_jobs route called.")
-    location = "Massachusetts"
-    field = "Research"
+    # Fetch Data
+    data = request.json
+    country_value = data.get('features', [])
+    radius_value = data.get('radius_value', "")
+    remote_value = data.get('remote_value', False)
+    age_value = data.get('age_value', "")
 
+    # Filter Acquired Data
     def filter_jobs(jobs_list):
         print("Filtering jobs.")
+
+        # Filter Prefs
         filtered_jobs = []
         exclude_keywords = ["bachelor", "accredited", "college", "undergraduate", "major", "mba", "degree", "Fulltime",
                             "Full-time", "full time", "Full-Time", "Full-time", "Full Time", "related experience",
-                            "CEO", "ceo", "CFO", "cfo", " ms ", " MS", "PhD", "+ years", "Ph.D", "Pursuing a "]
+                            "CEO", "ceo", "CFO", "cfo", " ms ", " MS", "PhD", "+ years", "Ph.D", "Pursuing a ", "Graduate", "graduate", "diploma", "Diploma", "GED"]
         include_keywords = ["intern", "high school"]
         include_phrases = ["high school", "highschool", "internship"]
         exclude_phrases = ["college", "university"]
         exclude_titles = ["CEO", "CFO", "CTO", "Chief", "Director", "Manager", "Senior"]
 
+        # Filter through Filter Prefs
         for job in jobs_list:
             description_lower = str(job.description).lower()
             title_lower = job.title.lower()
@@ -53,20 +60,23 @@ def get_jobs():
         print(f"Filtered {len(filtered_jobs)} jobs.")
         return filtered_jobs
 
+    # Scrape Jobs from Params
     try:
         jobs = scrape_jobs(
             site_name=["indeed", "zip_recruiter", "glassdoor"],
-            search_term="Research Intern",
-            location=location,
+            search_term="Intern",
             results_wanted=100,
-            country_indeed='usa',
-            hours_old=10000
+            country_indeed=country_value,
+            hours_old=age_value,
+            distance=radius_value,
+            is_remote=remote_value,
         )
         print("Jobs scraped successfully.")
     except Exception as e:
         print(f"Error scraping jobs: {e}")
         return jsonify({"error": "Failed to scrape jobs."}), 500
 
+    # List of Jobs from Params
     jobs_list = [Job(row['id'], row['title'], row['company'], row['description'], row['job_url'], 0, field, datetime.now()) for _, row in
                  jobs.iterrows() if row["job_type"] != "fulltime"]
 
@@ -75,6 +85,8 @@ def get_jobs():
     filtered_jobs = filter_jobs(jobs_list)
     print(f"Number of filtered jobs: {len(filtered_jobs)}")
 
+
+    # Get prestige from AI API (Groq)
     final_job_list = []
     job_data = []
     api_key = os.getenv("GROQ_API_KEY")
@@ -86,14 +98,19 @@ def get_jobs():
                 messages=[
                     {
                         "role": "user",
+
+                        # Prompt Below
                         "content": f"Rate out of 5 the prestige of use this key for {job.company} using only 1 number nothing else",
                     }
                 ],
+                # Model Type
                 model="llama3-8b-8192",
             )
+
+            # Error Check Prestige
             prestige = chat_completion.choices[0].message.content.strip()
             if len(prestige) > 1 or not prestige.isdigit():
-                prestige = "3"
+                prestige = "2"
             job.prestige = prestige
             final_job_list.append(job)
             job_data.append({
@@ -113,6 +130,7 @@ def get_jobs():
     jobs_endpoint = url_for('get_jobs', _external=True)
     print(f"Endpoint URL: {jobs_endpoint}")
 
+    # Return as json
     return jsonify(job_data)
 
 if __name__ == '__main__':

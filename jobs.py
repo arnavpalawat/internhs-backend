@@ -50,7 +50,3 @@ class Job:
             doc_ref.set(
                 self.toMap()
             )
-
-# Example usage:
-# job = Job("1", "Software Engineer", "Tech Company", "Develop software", "http://example.com", 5, "Engineering", datetime.now())
-# job.firestoreAdd()
