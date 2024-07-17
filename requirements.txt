@@ -1,0 +1,9 @@
+falcon
+firebase-admin
+groq
+jobspy
+falcon-cors
+python-dotenv
+nltk
+scikit-learn
+pandas

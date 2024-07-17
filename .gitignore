@@ -1,0 +1,9 @@
+# Ignore the .env file
+.env
+
+# Python specific ignores
+__pycache__/
+*.pyc
+
+# Firebase credentials
+*.json
