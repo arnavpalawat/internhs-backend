@@ -3,20 +3,19 @@ from firebase_admin import firestore
 from datetime import datetime
 
 class Job:
-    def __init__(self, id, title, company, description, link, prestige, field, date):
+    def __init__(self, id, title, company, description, link, prestige, date):
         self.id = id
         self.title = title
         self.company = company
         self.description = description
         self.link = link
         self.prestige = prestige
-        self.field = field
         self.date = date
 
     def __repr__(self):
         return (f"Job(id={self.id}, title={self.title}, company={self.company}, "
                 f"description={self.description}, link={self.link}, prestige={self.prestige}, "
-                f"field={self.field}, date={self.date})")
+                f"date={self.date})")
 
     def display(self):
         return (f"Job ID: {self.id}\n"
@@ -25,7 +24,6 @@ class Job:
                 f"Description: {self.description}\n"
                 f"Link: {self.link}\n"
                 f"Prestige: {self.prestige}\n"
-                f"Field: {self.field}\n"
                 f"Date: {self.date}")
 
     def toMap(self):
@@ -36,7 +34,6 @@ class Job:
             "description": self.description,
             "link": self.link,
             "prestige": self.prestige,
-            "field": self.field,
             "date": self.date
         }
 
@@ -57,3 +54,16 @@ class Job:
         description = firebase_data.get("description")
         title = firebase_data.get("title")
         return cls(id, description, title)
+
+class Jobs:
+  def __init__(self, id, description, title):
+      self.id = id
+      self.description = description
+      self.title = title
+
+  @classmethod
+  def from_firebase(cls, firebase_data):
+      id = firebase_data.get("id")
+      description = firebase_data.get("description")
+      title = firebase_data.get("title")
+      return cls(id, description, title)

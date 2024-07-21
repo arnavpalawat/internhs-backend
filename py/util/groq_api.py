@@ -4,8 +4,7 @@ from py.util import config
 
 
 def get_prestige(company):
-    api_key = config.GROQ_API_KEY
-    client = Groq(api_key=api_key)
+
     try:
         chat_completion = client.chat.completions.create(
             messages=[
