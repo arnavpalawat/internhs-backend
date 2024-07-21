@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 import pandas as pd
 from firebase_admin import firestore
@@ -13,6 +15,8 @@ from py.util.jobs import Job, Jobs
 from datetime import datetime
 from flask_cors import CORS
 
+repository_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
+os.chdir(repository_root)
 app = Flask(__name__)
 CORS(app)  # Allow CORS requests from any origin
 
@@ -218,3 +222,4 @@ def get_recommendations():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
