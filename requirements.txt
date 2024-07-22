@@ -3,7 +3,7 @@ pandas
 firebase-admin
 Flask
 groq
-jobspy
+python-jobspy
 scikit-learn
 python-dotenv
 flask_cors
